@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <title>Scimodo</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.3/socket.io.js" integrity="sha256-sdmLD9jD1PIzq3KOQPNSGZYxjv76rds79Mnyk5JNp1M=" crossorigin="anonymous"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css"/>
+  <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"/>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js" integrity="sha256-VNbX9NjQNRW+Bk02G/RO6WiTKuhncWI4Ey7LkSbE+5s=" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="./style.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sammy.js/0.7.6/sammy.min.js" integrity="sha256-fJgK6gF9zyNll54kPo9Ckcx0VxnOrrFBG7TTKNpGt6M=" crossorigin="anonymous"></script>
+  <script src="https://momentjs.com/downloads/moment.min.js"></script>
+  <script src="https://rawgit.com/adrotec/knockout-date-bindings/master/knockout-date-bindings.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/1000hz-bootstrap-validator/0.11.9/validator.min.js" integrity="sha256-dHf/YjH1A4tewEsKUSmNnV05DDbfGN3g7NMq86xgGh8=" crossorigin="anonymous"></script>
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+  <script src="./knockout.chart.js"></script>
+  <script src="./knockout-sortable.js"></script>
+  <script src="./knockout.mapping.js"></script>
+  <script src="./gauge.js"></script>
+  <script src="./application.js"></script>
+</head>
+<body style="display:none" data-bind="visible:true">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="#">
+          <img src="https://www.scimodo.com/wp-content/uploads/2017/06/scimodo_logo_slider_2.png" title="Scimodo"/>
+        </a>
+      </div>
+      <div id="navbar" class="collapse navbar-collapse">
+        <ul class="nav navbar-nav">
+          <li data-bind="css:{active:showPage('home')}, invisible:loggedin"><a href="#home">Home</a></li>
+          <li data-bind="css:{active:showPage('introduction')}, visible:loggedin"><a href="#introduction">Introduction</a></li>
+          <li data-bind="css:{active:showPage('mydata')}, visible:loggedin"><a href="#mydata">Scimodo Datasources &amp; Projects</a></li>
+          <li data-bind="css:{active:showPage('dashboard')}, visible:loggedin"><a href="#dashboard">Dashboard</a></li>
+          <li class="dropdown" data-bind="visible:projects().length > 1">
+            <a href="#dashboard" class=" dropdown-toggle" data-toggle="dropdown" role="button">Switch Project <span class="caret"></span></a>
+            <ul class="dropdown-menu" data-bind="foreach:projects">
+              <li><a data-bind="attr:{href:getDashboardLink}, text:name"></a></li>
+            </ul>
+          </li>
+          <li data-bind="invisible:loggedin"><a href="#home">Login</a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li data-bind="visible:loggedin"><a href="#home">Logout</a></li>
+        </ul>
+      </div><!--/.nav-collapse -->
+    </div>
+  </nav>
+
+  <div class="container" data-bind="visible:showPage('home')">
+    <div class="page-header">
+      <h1>Login or Signup</h1>
+    </div>
+    <div class="row">
+      <div class="col-md-6" data-bind="with:login">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Login</h3>
+          </div>
+          <div class="panel-body">
+            <div class="form-vertical" data-toggle="validator">
+              <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label>
+                <input required data-error="The email address is invalid" type="email" class="form-control" id="lemail" placeholder="Email" data-bind="value:email">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <input required data-minlength="10" type="password" class="form-control" id="lpassword" placeholder="Password" data-bind="value:password">
+                <div class="help-block with-errors"></div>
+              </div>
+              <button type="submit" class="btn btn-default" data-bind="click:login">Login</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6" data-bind="with:register">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Register</h3>
+          </div>
+          <div class="panel-body">
+            <div class="form-vertical" data-toggle="validator">
+              <div class="form-group">
+                <label for="exampleInputEmail1">Name</label>
+                <input required data-error="Name is required" type="text" class="form-control" id="name" placeholder="Name" data-bind="value:name">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label for="exampleInputEmail1">Email address</label>
+                <input required data-error="The email address is invalid or already taken" name="email" data-remote="http://ec2-52-72-137-164.compute-1.amazonaws.com:3000/email" type="email" class="form-control" id="email" placeholder="Email" data-bind="value:email">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label for="exampleInputEmail1">Zip Code</label>
+                <input required data-error="The zip code is invalid" pattern="\d{5}" type="text" class="form-control" id="zip" placeholder="Zip Code" data-bind="value:zipcode">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label for="exampleInputPassword1">Password</label>
+                <input required data-minlength="10" type="password" class="form-control" id="password" placeholder="Password" data-bind="value:password">
+                <div class="help-block with-errors">Minimum of 10 characters</div>
+              </div>
+              <div class="form-group">
+                <label for="exampleInputPassword1">Confirm Password</label>
+                <input required data-match="#password" data-match-error="Whoops, these don't match" type="password" class="form-control" id="password2" placeholder="Confirm Password" data-bind="value:password2">
+                <div class="help-block with-errors"></div>
+              </div>
+              <button type="submit" class="btn btn-default" data-bind="click:save">Register</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container" data-bind="visible:showPage('introduction')">
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Welcome to Scimodo!</h3>
+          </div>
+          <div class="panel-body">
+            This is where we tell you how to hook up your first device.
+          </div>
+        </div>
+      </div>
+      <div class="col-xs-12">
+        <div class="well">
+          <div class="row">
+            <div class="col-xs-12" data-bind="with:device">
+              Device ID: <strong data-bind="text:id"></strong>
+            </div>
+            <div class="col-xs-12" data-bind="with:project">
+              Project ID: <strong data-bind="text:id"></strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container" data-bind="visible:showPage('mydata')">
+    <div class="row">
+      <div class="col-xs-12 col-md-6">
+        <div class="row">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Devices</h3>
+            </div>
+            <div class="panel-body">
+              <div class="panel-group" id="devicesList" data-bind="foreach:devicesOnly">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h4 class="panel-title" data-toggle="collapse" data-parent="#devicesList" data-bind="text:displayName, attr:{href:hashid}">
+                    </h4>
+                  </div>
+                  <div data-bind="attr:{id:did}" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div class="form-vertical" data-toggle="validator">
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Device ID</label>
+                          <input disabled type="text" class="form-control" placeholder="Project ID" data-bind="value:id">
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Device Name</label>
+                          <input required data-error="Name is required" type="text" class="form-control" placeholder="Name" data-bind="value:name">
+                          <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Zip Code</label>
+                          <input required data-error="The zip code is invalid" pattern="\d{5}" type="text" class="form-control" placeholder="Name" data-bind="value:zipcode">
+                          <div class="help-block with-errors"></div>
+                        </div>
+                        <button type="submit" class="btn btn-default" data-bind="click:save">Save</button>
+                        <button class="btn btn-default pull-right" data-bind="click:del">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-default" data-bind="click:addDeviceMkr, visible:addDeviceVisibleMkr">Add New Device</button>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title">Scimodo Data Sources</h3>
+            </div>
+            <div class="panel-body">
+              <div class="panel-group" data-bind="foreach:devicesSource">
+                <div class="panel panel-default">
+                  <div class="panel-heading">
+                    <h4 class="panel-title" data-toggle="collapse" data-parent="#devicesList" data-bind="text:displayName, attr:{href:hashid}">
+                    </h4>
+                  </div>
+                  <div data-bind="attr:{id:did}" class="panel-collapse collapse">
+                    <div class="panel-body">
+                      <div class="form-vertical" data-toggle="validator">
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Data Source ID</label>
+                          <input disabled type="text" class="form-control" placeholder="Project ID" data-bind="value:id">
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Data Source Name</label>
+                          <input required data-error="Name is required" type="text" class="form-control" placeholder="Name" data-bind="value:name">
+                          <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Scimodo Data Source Type</label>
+                          <select class="form-control" required data-bind="options: types, value:type, optionsCaption:'Data Source Type'"></select>
+                          <div class="help-block with-errors"></div>
+                        </div>
+                        <div class="form-group">
+                          <label for="exampleInputEmail1">Zip Code</label>
+                          <input required data-error="The zip code is invalid" pattern="\d{5}" type="text" class="form-control" placeholder="Name" data-bind="value:zipcode">
+                          <div class="help-block with-errors"></div>
+                        </div>
+                        <button type="submit" class="btn btn-default" data-bind="click:save">Save</button>
+                        <button class="btn btn-default pull-right" data-bind="click:del">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-default" data-bind="click:addDevice, visible:addDeviceVisible">Add New Data Source</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-xs-12 col-md-6">
+        <div class="panel panel-default">
+          <div class="panel-heading">
+            <h3 class="panel-title">Projects</h3>
+          </div>
+          <div class="panel-body">
+            <div class="panel-group" id="projectsList" data-bind="foreach:projects">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                  <h4 class="panel-title" data-toggle="collapse" data-parent="#projectsList" data-bind="text:displayName, attr:{href:hashid}">
+                  </h4>
+                </div>
+                <div data-bind="attr:{id:pid}" class="panel-collapse collapse">
+                  <div class="panel-body">
+                    <div class="form-vertical" data-toggle="validator">
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Project ID</label>
+                        <input disabled type="text" class="form-control" placeholder="Project ID" data-bind="value:id">
+                      </div>
+                      <div class="form-group">
+                        <label for="exampleInputEmail1">Project Name</label>
+                        <input required data-error="Name is required" type="text" class="form-control" placeholder="Name" data-bind="value:name">
+                        <div class="help-block with-errors"></div>
+                      </div>
+                      <div class="form-group" data-bind="visible:assocs().length > 0">
+                        <label for="exampleInputEmail1">Associated Devices</label>
+                        <div class="input-group">
+                          <select class="form-control" data-bind="options:assocs, optionsText:'name', value:assoc, optionsCaption: 'Remove Device from Project'"></select>
+                          <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" tabindex="-1" data-bind="click:disassociate">Disassociate</button>
+                          </span>
+                        </div>
+                      </div>
+                      <div class="form-group">
+                        <div class="input-group">
+                          <select class="form-control" data-bind="options:devices, optionsText:'name', value:device, optionsCaption: 'Add Device to Project'"></select>
+                          <span class="input-group-btn">
+                            <button class="btn btn-default" type="button" tabindex="-1" data-bind="click:associate">Associate</button>
+                          </span>
+                        </div>
+                      </div>
+                      <button type="submit" class="btn btn-default" data-bind="click:save">Save</button>
+                      <button class="btn btn-default pull-right" data-bind="click:del">Delete</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-default" data-bind="click:addProject, visible:addProjectVisible">Add New Project</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container" data-bind="visible:showPage('dashboard'), with:project">
+    <div class="row">
+      <div class="col form-inline">
+        <label>
+          <span>Data: </span>
+          <input class="form-control" id="realtime" checked type="checkbox" data-toggle="toggle" data-on="Real Time" data-off="Historic" value="yes" data-bind="bootstrapToggle:$root.realtime"/>
+        </label>
+        <label data-bind="visible:$root.realtime">
+          <select class="form-control" data-bind="options:$root.durations, optionsValue:'seconds', optionsText:'text', value:$root.duration"></select>
+        </label>
+        <label data-bind="invisible:$root.realtime, css:{'has-error':$root.hasError}">
+          <span>Timeframe: </span>
+          <input class="form-control" type="datetime-local" data-bind="value:$root.starttime" /> to
+          <input class="form-control" type="datetime-local" data-bind="value:$root.endtime" />
+          <span class="help-block" data-bind="visible:$root.hasError">Start Date must be before the End Date, and can be no more than 30 days apart.</span>
+        </label>
+        <label>
+          <span>Interval: </span>
+          <select class="form-control" data-bind="options:$root.intervals, optionsValue:'seconds', optionsText:'text', value:$root.interval"></select>
+        </label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-12" id="charts" data-bind="sortable:charts">
+        <div class="chartContainer chart">
+          <div data-bind="visible:showChart">
+            <div data-bind="attr:{id:cid,width:width, height:height}, style:{width:width, height:height}, resizable:{animate:true, resize:setsize, stop:savesize, ghost:true}">
+              <!-- ko if:config.type()!='pie' -->
+              <canvas data-bind="chart: { type: type, data: data, options:options }, toggle:showChart"></canvas>
+              <!-- /ko -->
+              <!-- ko if:config.type()=='pie' -->
+              <h4 data-bind="text:name"></h4>
+              <div style="width:100%; height:100%" data-bind="foreach:bindings, toggle:showChart">
+                <!-- ko if:selected -->
+                <div style="height:150px; width:150px; position:relative; display:inline-block">
+                  <div data-bind="text:id" style="top:140px; position:absolute; margin:0 auto; z-index:2; width:150px; text-align:center"></div>
+                  <canvas style="position:absolute; z-imdex:1" data-bind="attr:{keytag:keytag, device:device, id:sequence}" width="150" height="150"/>
+                </div>
+                <!-- /ko -->
+              </div>
+              <!-- /ko -->
+            </div>
+          </div>
+          <div data-bind="invisible:showChart">
+            <div data-bind="style:{width:width}" class="form-vertical" data-toggle="validator">
+              <div class="form-group">
+                <label>Title</label>
+                <input required data-error="The title is required" class="form-control" placeholder="Chart Title" data-bind="value:name">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label>Chart Type</label>
+                <select required data-bind="value:config.type, options:types, optionsValue:'type', optionsText:'name', optionCaption:'Select Chart Type'"></select>
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label>Width (in pixels)</label>
+                <input required min="0" max="1000" type="number" class="form-control" placeholder="Width" data-bind="value:config.width">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label>Height (in pixels)</label>
+                <input required min="0" max="1000" type="number" class="form-control" placeholder="Height" data-bind="value:config.height">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label>X Axis Title</label>
+                <input required min="0" max="1000" type="text" class="form-control" placeholder="Width" data-bind="value:config.x">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label>Y Axis Title</label>
+                <input required min="0" max="1000" type="text" class="form-control" placeholder="Width" data-bind="value:config.y1">
+                <div class="help-block with-errors"></div>
+              </div>
+              <div class="form-group">
+                <label>Datasets</label>
+                <!-- ko foreach:bindings -->
+                <div class="checkbox">
+                  <label>
+                    <input type="checkbox" data-bind="checked:selected"/>
+                    <span data-bind="text:id"></span>
+                  </label>
+                </div>
+                <!-- /ko -->
+              </div>
+              <button class="btn btn-default" data-bind="toggle:showChart, click:updateChartMeta">Save</button>
+              <button class="btn btn-default" data-bind="toggle:showChart">Cancel</button>
+              <button class="btn btn-default pull-right" data-bind="click:del">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="btn btn-default fixedButton" data-bind="click:addChart, visible:showAddChart">Add Chart</button>
+    </div>
+  </div>
+  <footer class="footer">
+    <div class="container">
+      <p class="text-muted">Scimodo Footer</p>
+    </div>
+  </footer>
+  <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+</body>
+</html>
